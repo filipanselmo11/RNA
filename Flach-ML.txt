@@ -1,0 +1,115 @@
+Você pode não estar ciente disso, 
+mas é provável que você já seja um usuário regular da 
+tecnologia de aprendizado de máquina. 
+A maioria dos clientes de email atuais incorpora algoritmos para identificar 
+e filtrar emails de spam, 
+também conhecidos como lixo eletrônico ou email em massa não solicitado.
+Os primeiros filtros de spam contavam com técnicas de correspondência de padrões 
+codificadas manualmente, como expressões regulares, 
+mas logo ficou claro que isso é difícil de 
+manter e oferece flexibilidade insuficiente - 
+afinal, o spam de uma pessoa é o presunto de outra pessoa. 
+Adaptabilidade e flexibilidade adicionais são obtidas 
+empregando técnicas de aprendizado de máquina.
+
+O SpamAssassin é um filtro de spam de código aberto amplamente usado. 
+Ele calcula uma pontuação para um e-mail recebido, 
+com base em várias regras internas ou 'testes' na terminologia do SpamAssassin 
+e adiciona um sinalizador de 'lixo' e um relatório de resumo aos 
+cabeçalhos do e-mail, se a pontuação é 5 ou mais. 
+Aqui está um exemplo de relatório para um email que recebi.
+
+
+##################################
+
+-0.1 RCVD_IN_MXRATE_WL          RBL: MxRate permite recomendar [123.45.6.789 listado em sub.mxrate.net]
+0.6 HTML_IMAGE_RATIO_02         BODY: HTML possui uma proporção baixa da área de texto para imagem
+1.2 TVD_FW_GRAPHIC_NAME_MID     BODY: TVD_FW_GRAPHIC_NAME_MID
+0.0 HTML_MESSAGE                BODY: HTML incluido na mensagem
+0.6 HTML_FONx_FACE_BAD          BODY: HTML face da fonte não é uma palavra
+1.4 SARE_GIF_ATTACH             FULL: O Email tem um gif embutido
+0.1 BOUNCE_MESSAGE              MTA: Mensagem devolvida
+0.1 ANY_BOUNCE_MESSAGE          Mensagem é algum tipo de mensagem devolvida
+1.4 AWL                         AWL: De: o endereço está na lista de permissões automáticas
+
+######################################
+
+Da esquerda para a direita, você vê anexado a um teste específico, 
+o identificador do teste e uma breve descrição, 
+incluindo uma referência à parte relevante do email. 
+Como você vê, as pontuações para testes individuais 
+podem ser negativas (indicando evidências que sugerem que o e-mail é incorreto e não spam), 
+além de positivas. A pontuação geral de 5,3 sugere que o email pode ser spam. 
+Por acaso, esse email em particular foi uma notificação de um servidor intermediário de 
+que outra mensagem - que tinha uma pontuação de 14,6 - foi rejeitada como spam. 
+Essa mensagem de 'devolução' incluía a mensagem original e, portanto, 
+herdou algumas dessas características, como uma baixa taxa de texto para imagem, 
+que elevou a pontuação acima do limite de 5.
+
+Aqui está outro exemplo, 
+desta vez de um email importante que eu esperava há algum tempo, 
+apenas para ser encontrado definhando na minha pasta de spam:
+
+2.5 URI_NOVOWEL                 URI: URI hostname possui uma sequência longa que não é vogal
+3.1 FROM_DOMAIN_NOVOWEL         FROM: domínio tem uma série de letras que não são vogais
+
+O e-mail em questão dizia respeito a um artigo que eu e um dos membros do meu grupo 
+submetemos à 
+Conferência Europeia sobre Aprendizado de Máquina (ECML) 
+e à Conferência Europeia sobre Princípios e Prática de Descoberta de Conhecimento em Bancos de Dados (PKDD),
+ que organizada em conjunto desde 2001. 
+ A edição de 2008 dessas conferências usou o domínio da Internet www.ecmlpkdd2008.org 
+ - perfeitamente respeitável, como sabem os pesquisadores de aprendizado de máquina, 
+ mas também um com onze 'não-vogais' sucessivas - o suficiente para aumentar o SpamAssassin's 
+ suspeita. O exemplo demonstra que a importância de um teste SpamAssasins pode ser diferente 
+ para diferentes usuários.
+O Machine Learning é uma excelente maneira de criar software que se adapta ao usuário.
+
+Como o SpamAssassin determina as pontuações ou 'pesos' para cada uma das dezenas de 
+testes que se aplica? É aqui que entra o aprendizado de máquina. 
+Suponha que tenhamos um grande 'conjunto de treinamento' de e-mails rotulados à mão como spam 
+ou presunto e que saibamos os resultados de todos os testes para cada um desses e-mails. 
+O objetivo agora é ter um peso para cada teste, de modo que todos os e-mails com spam recebam 
+uma pontuação acima de 5, e todos os e-mails sem receita tenham menos que 5. 
+Como discutiremos mais adiante neste livro, há um número de técnicas de aprendizado de 
+máquina que resolvem exatamente esse problema. Por enquanto, um exemplo simples ilustrará a 
+idéia principal.
+
+Tabela 1 - Um pequeno conjunto de treinamento para o SpamAssassin. 
+As colunas marcadas com x1 e x2 indicam os resultados de dois testes em quatro e-mails diferentes. 
+A quarta coluna indica quais dos e-mails são ampliados. 
+A coluna mais à direita demonstra que, ao limitar a função 4x1 + 4x2 em 5, 
+podemos separar spam de ham.
+
+Exemplo 1 (classificação linear). Suponha que tenhamos apenas dois testes e quatro e-mails de 
+treinamento, um dos quais é spam. 
+Ambos os testes são bem-sucedidos para o email de spam; para um e-mail fixo, 
+nenhum teste é bem-sucedido, para outro o primeiro teste é bem-sucedido e o segundo não, 
+e para o terceiro e-mail fixo, o primeiro teste falha e o segundo é bem-sucedido. 
+É fácil ver que atribuir a ambos os testes um peso de 4 'classifica' corretamente esses 
+quatro e-mails em spam e presunto. 
+Na notação matemática introduzida no Antecedente 1, poderíamos descrever esse classificador 
+como 4x1 + 4x2> 5 ou (4,4) * (x1, x2)> 5. De fato, qualquer peso entre 2,5 e 5 garantirá a 
+consideração de atribuir pesos diferentes para os testes - desde que cada peso seja menor 
+que 5 e sua soma exceda 5 - embora seja difícil ver como isso pode ser justificado 
+pelos dados de treinamento.
+
+Mas o que isso tem a ver com a aprendizagem, ouvi você perguntar? Afinal, 
+é apenas um problema matemático. 
+Isso pode ser verdade, mas não parece irracional dizer que o SpamAssassin 
+aprende a reconhecer emails de spam de exemplos e contra-exemplos. 
+Além disso, quanto mais dados de treinamento forem disponibilizados, melhor o SpamAssassin se 
+tornará nessa tarefa. A noção de desempenho que melhora com a experiência é central para a maioria, 
+senão todas, as formas de aprendizado de máquina. 
+Usaremos a seguinte definição geral: Machine Learning é o estudo sistemático de algoritmos e 
+sistemas que aprimoram seu conhecimento ou desempenho com a experiência. 
+No caso do SpamAssassin, a experiência obtida é com alguns dados de treinamento rotulados 
+corretamente e "desempenho" refere-se à capacidade de reconhecer emails de spam. 
+Uma visão esquemática de como o aprendizado de máquina alimenta a tarefa de classificação de e-mail 
+de spam é apresentada na Figura 2. Em outros problemas de aprendizado de máquina, 
+a experiência pode assumir uma forma diferente, como correções de erros, 
+recompensas quando um determinado objetivo é alcançado, entre muitos outros. 
+Observe também que, assim como acontece com o aprendizado humano, 
+o aprendizado de máquina nem sempre é direcionado para melhorar o desempenho de uma 
+determinada tarefa, mas geralmente pode resultar em aprimoramento do conhecimento.
+
